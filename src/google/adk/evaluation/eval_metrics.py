@@ -16,12 +16,28 @@ from __future__ import annotations
 
 from typing import Optional
 
+from google.genai import types as genai_types
 from pydantic import alias_generators
 from pydantic import BaseModel
 from pydantic import ConfigDict
+from pydantic import Field
 
 from .eval_case import Invocation
 from .evaluator import EvalStatus
+
+
+class JudgeModelOptions(BaseModel):
+  """Options for an eval metric's judge model."""
+
+  judge_model: str
+  """The judge model to use for evaluation. It can be a model name."""
+
+  judge_model_config: Optional[genai_types.GenerateContentConfig] = Field(
+      default=None, description="""The configuration for the judge model."""
+  )
+
+  num_samples: int = 1
+  """The number of times to sample the model for each invocation evaluation."""
 
 
 class EvalMetric(BaseModel):
@@ -37,6 +53,11 @@ class EvalMetric(BaseModel):
 
   threshold: float
   """A threshold value. Each metric decides how to interpret this threshold."""
+
+  judge_model_options: Optional[JudgeModelOptions] = Field(
+      default=None,
+      description="""Options for the judge model, if applicable.""",
+  )
 
 
 class EvalMetricResult(EvalMetric):
