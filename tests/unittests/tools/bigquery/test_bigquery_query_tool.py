@@ -25,6 +25,7 @@ from google.adk.tools.bigquery import BigQueryToolset
 from google.adk.tools.bigquery.config import BigQueryToolConfig
 from google.adk.tools.bigquery.config import WriteMode
 from google.adk.tools.bigquery.query_tool import execute_sql
+from google.adk.tools.tool_context import ToolContext
 from google.auth.exceptions import DefaultCredentialsError
 from google.cloud import bigquery
 from google.oauth2.credentials import Credentials
@@ -87,6 +88,8 @@ async def test_execute_sql_declaration_read_only(tool_config):
           executed.
         query (str): The BigQuery SQL query to be executed.
         credentials (Credentials): The credentials to use for the request.
+        config (BigQueryToolConfig): The configuration for the tool.
+        tool_context (ToolContext): The context for the tool.
 
     Returns:
         dict: Dictionary representing the result of the query.
@@ -97,7 +100,7 @@ async def test_execute_sql_declaration_read_only(tool_config):
     Examples:
         Fetch data or insights from a table:
 
-            >>> execute_sql("bigframes-dev",
+            >>> execute_sql("my_project",
             ... "SELECT island, COUNT(*) AS population "
             ... "FROM bigquery-public-data.ml_datasets.penguins GROUP BY island")
             {
@@ -146,6 +149,8 @@ async def test_execute_sql_declaration_write(tool_config):
           executed.
         query (str): The BigQuery SQL query to be executed.
         credentials (Credentials): The credentials to use for the request.
+        config (BigQueryToolConfig): The configuration for the tool.
+        tool_context (ToolContext): The context for the tool.
 
     Returns:
         dict: Dictionary representing the result of the query.
@@ -156,7 +161,7 @@ async def test_execute_sql_declaration_write(tool_config):
     Examples:
         Fetch data or insights from a table:
 
-            >>> execute_sql("bigframes-dev",
+            >>> execute_sql("my_project",
             ... "SELECT island, COUNT(*) AS population "
             ... "FROM bigquery-public-data.ml_datasets.penguins GROUP BY island")
             {
@@ -177,9 +182,29 @@ async def test_execute_sql_declaration_write(tool_config):
               ]
             }
 
+        Create a table with schema prescribed:
+
+            >>> execute_sql("my_project",
+            ... "CREATE TABLE my_project.my_dataset.my_table "
+            ... "(island STRING, population INT64)")
+            {
+              "status": "SUCCESS",
+              "rows": []
+            }
+
+        Insert data into an existing table:
+
+            >>> execute_sql("my_project",
+            ... "INSERT INTO my_project.my_dataset.my_table (island, population) "
+            ... "VALUES ('Dream', 124), ('Biscoe', 168)")
+            {
+              "status": "SUCCESS",
+              "rows": []
+            }
+
         Create a table from the result of a query:
 
-            >>> execute_sql("bigframes-dev",
+            >>> execute_sql("my_project",
             ... "CREATE TABLE my_project.my_dataset.my_table AS "
             ... "SELECT island, COUNT(*) AS population "
             ... "FROM bigquery-public-data.ml_datasets.penguins GROUP BY island")
@@ -190,7 +215,7 @@ async def test_execute_sql_declaration_write(tool_config):
 
         Delete a table:
 
-            >>> execute_sql("bigframes-dev",
+            >>> execute_sql("my_project",
             ... "DROP TABLE my_project.my_dataset.my_table")
             {
               "status": "SUCCESS",
@@ -199,7 +224,7 @@ async def test_execute_sql_declaration_write(tool_config):
 
         Copy a table to another table:
 
-            >>> execute_sql("bigframes-dev",
+            >>> execute_sql("my_project",
             ... "CREATE TABLE my_project.my_dataset.my_table_clone "
             ... "CLONE my_project.my_dataset.my_table")
             {
@@ -210,7 +235,7 @@ async def test_execute_sql_declaration_write(tool_config):
         Create a snapshot (a lightweight, read-optimized copy) of en existing
         table:
 
-            >>> execute_sql("bigframes-dev",
+            >>> execute_sql("my_project",
             ... "CREATE SNAPSHOT TABLE my_project.my_dataset.my_table_snapshot "
             ... "CLONE my_project.my_dataset.my_table")
             {
@@ -222,14 +247,130 @@ async def test_execute_sql_declaration_write(tool_config):
         - If a destination table already exists, there are a few ways to overwrite
         it:
             - Use "CREATE OR REPLACE TABLE" instead of "CREATE TABLE".
-            - First run "DROP TABLE", followed by "CREATE TABLE".
-        - To insert data into a table, use "INSERT INTO" statement.""")
+            - First run "DROP TABLE", followed by "CREATE TABLE".""")
+
+
+@pytest.mark.parametrize(
+    ("tool_config",),
+    [
+        pytest.param(
+            BigQueryToolConfig(write_mode=WriteMode.PROTECTED),
+            id="explicit-protected-write",
+        ),
+    ],
+)
+@pytest.mark.asyncio
+async def test_execute_sql_declaration_protected_write(tool_config):
+  """Test BigQuery execute_sql tool declaration with protected writes enabled.
+
+  This test verifies that the execute_sql tool declaration reflects the
+  protected write capability.
+  """
+  tool_name = "execute_sql"
+  tool = await get_tool(tool_name, tool_config)
+  assert tool.name == tool_name
+  assert tool.description == textwrap.dedent("""\
+    Run a BigQuery SQL query in the project and return the result.
+
+    Args:
+        project_id (str): The GCP project id in which the query should be
+          executed.
+        query (str): The BigQuery SQL query to be executed.
+        credentials (Credentials): The credentials to use for the request.
+        config (BigQueryToolConfig): The configuration for the tool.
+        tool_context (ToolContext): The context for the tool.
+
+    Returns:
+        dict: Dictionary representing the result of the query.
+              If the result contains the key "result_is_likely_truncated" with
+              value True, it means that there may be additional rows matching the
+              query not returned in the result.
+
+    Examples:
+        Fetch data or insights from a table:
+
+            >>> execute_sql("my_project",
+            ... "SELECT island, COUNT(*) AS population "
+            ... "FROM bigquery-public-data.ml_datasets.penguins GROUP BY island")
+            {
+              "status": "ERROR",
+              "rows": [
+                  {
+                      "island": "Dream",
+                      "population": 124
+                  },
+                  {
+                      "island": "Biscoe",
+                      "population": 168
+                  },
+                  {
+                      "island": "Torgersen",
+                      "population": 52
+                  }
+              ]
+            }
+
+        Create a temporary table with schema prescribed:
+
+            >>> execute_sql("my_project",
+            ... "CREATE TEMP TABLE my_table (island STRING, population INT64)")
+            {
+              "status": "SUCCESS",
+              "rows": []
+            }
+
+        Insert data into an existing temporary table:
+
+            >>> execute_sql("my_project",
+            ... "INSERT INTO my_table (island, population) "
+            ... "VALUES ('Dream', 124), ('Biscoe', 168)")
+            {
+              "status": "SUCCESS",
+              "rows": []
+            }
+
+        Create a temporary table from the result of a query:
+
+            >>> execute_sql("my_project",
+            ... "CREATE TEMP TABLE my_table AS "
+            ... "SELECT island, COUNT(*) AS population "
+            ... "FROM bigquery-public-data.ml_datasets.penguins GROUP BY island")
+            {
+              "status": "SUCCESS",
+              "rows": []
+            }
+
+        Delete a table:
+
+            >>> execute_sql("my_project", "DROP TABLE my_table")
+            {
+              "status": "SUCCESS",
+              "rows": []
+            }
+
+        Copy a temporary table to another temporary table:
+
+            >>> execute_sql("my_project",
+            ... "CREATE TEMP TABLE my_table_clone CLONE my_table")
+            {
+              "status": "SUCCESS",
+              "rows": []
+            }
+
+    Notes:
+        - If a destination table already exists, there are a few ways to overwrite
+        it:
+            - Use "CREATE OR REPLACE TEMP TABLE" instead of "CREATE TEMP TABLE".
+            - First run "DROP TABLE", followed by "CREATE TEMP TABLE".
+        - Only temporary tables can be created and inserted into. Please do not
+        try creating a permanent table (non-TEMP table) or deleting one.""")
 
 
 @pytest.mark.parametrize(
     ("write_mode",),
     [
         pytest.param(WriteMode.BLOCKED, id="blocked"),
+        pytest.param(WriteMode.PROTECTED, id="protected"),
         pytest.param(WriteMode.ALLOWED, id="allowed"),
     ],
 )
@@ -241,6 +382,11 @@ def test_execute_sql_select_stmt(write_mode):
   query_result = [{"num": 123}]
   credentials = mock.create_autospec(Credentials, instance=True)
   tool_config = BigQueryToolConfig(write_mode=write_mode)
+  tool_context = mock.create_autospec(ToolContext, instance=True)
+  tool_context.state.get.return_value = (
+      "test-bq-session-id",
+      "_anonymous_dataset",
+  )
 
   with mock.patch("google.cloud.bigquery.Client", autospec=False) as Client:
     # The mock instance
@@ -255,7 +401,7 @@ def test_execute_sql_select_stmt(write_mode):
     bq_client.query_and_wait.return_value = query_result
 
     # Test the tool
-    result = execute_sql(project, query, credentials, tool_config)
+    result = execute_sql(project, query, credentials, tool_config, tool_context)
     assert result == {"status": "SUCCESS", "rows": query_result}
 
 
@@ -280,6 +426,7 @@ def test_execute_sql_non_select_stmt_write_allowed(query, statement_type):
   query_result = []
   credentials = mock.create_autospec(Credentials, instance=True)
   tool_config = BigQueryToolConfig(write_mode=WriteMode.ALLOWED)
+  tool_context = mock.create_autospec(ToolContext, instance=True)
 
   with mock.patch("google.cloud.bigquery.Client", autospec=False) as Client:
     # The mock instance
@@ -294,7 +441,7 @@ def test_execute_sql_non_select_stmt_write_allowed(query, statement_type):
     bq_client.query_and_wait.return_value = query_result
 
     # Test the tool
-    result = execute_sql(project, query, credentials, tool_config)
+    result = execute_sql(project, query, credentials, tool_config, tool_context)
     assert result == {"status": "SUCCESS", "rows": query_result}
 
 
@@ -319,6 +466,7 @@ def test_execute_sql_non_select_stmt_write_blocked(query, statement_type):
   query_result = []
   credentials = mock.create_autospec(Credentials, instance=True)
   tool_config = BigQueryToolConfig(write_mode=WriteMode.BLOCKED)
+  tool_context = mock.create_autospec(ToolContext, instance=True)
 
   with mock.patch("google.cloud.bigquery.Client", autospec=False) as Client:
     # The mock instance
@@ -333,10 +481,112 @@ def test_execute_sql_non_select_stmt_write_blocked(query, statement_type):
     bq_client.query_and_wait.return_value = query_result
 
     # Test the tool
-    result = execute_sql(project, query, credentials, tool_config)
+    result = execute_sql(project, query, credentials, tool_config, tool_context)
     assert result == {
         "status": "ERROR",
         "error_details": "Read-only mode only supports SELECT statements.",
+    }
+
+
+@pytest.mark.parametrize(
+    ("query", "statement_type"),
+    [
+        pytest.param(
+            "CREATE TEMP TABLE my_table AS SELECT 123 AS num",
+            "CREATE_AS_SELECT",
+            id="create-as-select",
+        ),
+        pytest.param(
+            "DROP TABLE my_table",
+            "DROP_TABLE",
+            id="drop-table",
+        ),
+    ],
+)
+def test_execute_sql_non_select_stmt_write_protected(query, statement_type):
+  """Test execute_sql tool for non-SELECT query when writes are protected."""
+  project = "my_project"
+  query_result = []
+  credentials = mock.create_autospec(Credentials, instance=True)
+  tool_config = BigQueryToolConfig(write_mode=WriteMode.PROTECTED)
+  tool_context = mock.create_autospec(ToolContext, instance=True)
+  tool_context.state.get.return_value = (
+      "test-bq-session-id",
+      "_anonymous_dataset",
+  )
+
+  with mock.patch("google.cloud.bigquery.Client", autospec=False) as Client:
+    # The mock instance
+    bq_client = Client.return_value
+
+    # Simulate the result of query API
+    query_job = mock.create_autospec(bigquery.QueryJob)
+    query_job.statement_type = statement_type
+    query_job.destination.dataset_id = "_anonymous_dataset"
+    bq_client.query.return_value = query_job
+
+    # Simulate the result of query_and_wait API
+    bq_client.query_and_wait.return_value = query_result
+
+    # Test the tool
+    result = execute_sql(project, query, credentials, tool_config, tool_context)
+    assert result == {"status": "SUCCESS", "rows": query_result}
+
+
+@pytest.mark.parametrize(
+    ("query", "statement_type"),
+    [
+        pytest.param(
+            "CREATE TEMP TABLE my_dataset.my_table AS SELECT 123 AS num",
+            "CREATE_AS_SELECT",
+            id="create-as-select",
+        ),
+        pytest.param(
+            "DROP TABLE my_dataset.my_table",
+            "DROP_TABLE",
+            id="drop-table",
+        ),
+    ],
+)
+def test_execute_sql_non_select_stmt_write_protected_persistent_data(
+    query, statement_type
+):
+  """Test execute_sql tool for non-SELECT query when writes are protected.
+
+  This is a special case when the destination table is a persistent/permananent
+  one and the protected write is enabled. In this case the operation should fail.
+  """
+  project = "my_project"
+  query_result = []
+  credentials = mock.create_autospec(Credentials, instance=True)
+  tool_config = BigQueryToolConfig(write_mode=WriteMode.PROTECTED)
+  tool_context = mock.create_autospec(ToolContext, instance=True)
+  tool_context.state.get.return_value = (
+      "test-bq-session-id",
+      "_anonymous_dataset",
+  )
+
+  with mock.patch("google.cloud.bigquery.Client", autospec=False) as Client:
+    # The mock instance
+    bq_client = Client.return_value
+
+    # Simulate the result of query API
+    query_job = mock.create_autospec(bigquery.QueryJob)
+    query_job.statement_type = statement_type
+    query_job.destination.dataset_id = "my_dataset"
+    bq_client.query.return_value = query_job
+
+    # Simulate the result of query_and_wait API
+    bq_client.query_and_wait.return_value = query_result
+
+    # Test the tool
+    result = execute_sql(project, query, credentials, tool_config, tool_context)
+    assert result == {
+        "status": "ERROR",
+        "error_details": (
+            "Protected write mode only supports SELECT statements, or write"
+            " operations to a BigQuery session."
+        ),
     }
 
 
@@ -361,6 +611,7 @@ def test_execute_sql_no_default_auth(
   query_result = [{"num": 123}]
   credentials = mock.create_autospec(Credentials, instance=True)
   tool_config = BigQueryToolConfig(write_mode=write_mode)
+  tool_context = mock.create_autospec(ToolContext, instance=True)
 
   # Simulate the behavior of default auth - on purpose throw exception when
   # the default auth is called
@@ -377,6 +628,6 @@ def test_execute_sql_no_default_auth(
   mock_query_and_wait.return_value = query_result
 
   # Test the tool worked without invoking default auth
-  result = execute_sql(project, query, credentials, tool_config)
+  result = execute_sql(project, query, credentials, tool_config, tool_context)
   assert result == {"status": "SUCCESS", "rows": query_result}
   mock_default_auth.assert_not_called()

@@ -20,10 +20,12 @@ from google.auth.credentials import Credentials
 from google.cloud import bigquery
 
 from . import client
+from ..tool_context import ToolContext
 from .config import BigQueryToolConfig
 from .config import WriteMode
 
 MAX_DOWNLOADED_QUERY_RESULT_ROWS = 50
+BIGQUERY_SESSION_INFO_KEY = "bigquery_session_info"
 
 
 def execute_sql(
@@ -31,6 +33,7 @@ def execute_sql(
     query: str,
     credentials: Credentials,
     config: BigQueryToolConfig,
+    tool_context: ToolContext,
 ) -> dict:
   """Run a BigQuery SQL query in the project and return the result.
 
@@ -39,6 +42,8 @@ def execute_sql(
         executed.
       query (str): The BigQuery SQL query to be executed.
       credentials (Credentials): The credentials to use for the request.
+      config (BigQueryToolConfig): The configuration for the tool.
+      tool_context (ToolContext): The context for the tool.
 
   Returns:
       dict: Dictionary representing the result of the query.
@@ -49,7 +54,7 @@ def execute_sql(
   Examples:
       Fetch data or insights from a table:
 
-          >>> execute_sql("bigframes-dev",
+          >>> execute_sql("my_project",
           ... "SELECT island, COUNT(*) AS population "
           ... "FROM bigquery-public-data.ml_datasets.penguins GROUP BY island")
           {
@@ -72,23 +77,87 @@ def execute_sql(
   """
 
   try:
+    # Get BigQuery client
     bq_client = client.get_bigquery_client(
         project=project_id, credentials=credentials
     )
+
+    # BigQuery connection properties where applicable
+    bq_connection_properties = None
+
     if not config or config.write_mode == WriteMode.BLOCKED:
-      query_job = bq_client.query(
+      dry_run_query_job = bq_client.query(
           query,
           project=project_id,
           job_config=bigquery.QueryJobConfig(dry_run=True),
       )
-      if query_job.statement_type != "SELECT":
+      if dry_run_query_job.statement_type != "SELECT":
         return {
             "status": "ERROR",
             "error_details": "Read-only mode only supports SELECT statements.",
         }
+    elif config.write_mode == WriteMode.PROTECTED:
+      # In protected write mode, write operation only to a temporary artifact is
+      # allowed. This artifact must have been created in a BigQuery session. In
+      # such a scenario the session info (session id and the anonymous dataset
+      # containing the artifact) is persisted in the tool context.
+      bq_session_info = tool_context.state.get(BIGQUERY_SESSION_INFO_KEY, None)
+      if bq_session_info:
+        bq_session_id, bq_session_dataset_id = bq_session_info
+      else:
+        session_creator_job = bq_client.query(
+            "SELECT 1",
+            project=project_id,
+            job_config=bigquery.QueryJobConfig(
+                dry_run=True, create_session=True
+            ),
+        )
+        bq_session_id = session_creator_job.session_info.session_id
+        bq_session_dataset_id = session_creator_job.destination.dataset_id
 
+        # Remember the BigQuery session info for subsequent queries
+        tool_context.state[BIGQUERY_SESSION_INFO_KEY] = (
+            bq_session_id,
+            bq_session_dataset_id,
+        )
+
+      # Session connection property will be set in the query execution
+      bq_connection_properties = [
+          bigquery.ConnectionProperty("session_id", bq_session_id)
+      ]
+
+      # Check the query type w.r.t. the BigQuery session
+      dry_run_query_job = bq_client.query(
+          query,
+          project=project_id,
+          job_config=bigquery.QueryJobConfig(
+              dry_run=True,
+              connection_properties=bq_connection_properties,
+          ),
+      )
+      if (
+          dry_run_query_job.statement_type != "SELECT"
+          and dry_run_query_job.destination.dataset_id != bq_session_dataset_id
+      ):
+        return {
+            "status": "ERROR",
+            "error_details": (
+                "Protected write mode only supports SELECT statements, or write"
+                " operations to a BigQuery session."
+            ),
+        }
+
+    # Finally execute the query and fetch the result
+    job_config = (
+        bigquery.QueryJobConfig(connection_properties=bq_connection_properties)
+        if bq_connection_properties
+        else None
+    )
     row_iterator = bq_client.query_and_wait(
-        query, project=project_id, max_results=MAX_DOWNLOADED_QUERY_RESULT_ROWS
+        query,
+        job_config=job_config,
+        project=project_id,
+        max_results=MAX_DOWNLOADED_QUERY_RESULT_ROWS,
     )
     rows = [{key: val for key, val in row.items()} for row in row_iterator]
     result = {"status": "SUCCESS", "rows": rows}
@@ -106,9 +175,29 @@ def execute_sql(
 
 
 _execute_sql_write_examples = """
+      Create a table with schema prescribed:
+
+          >>> execute_sql("my_project",
+          ... "CREATE TABLE my_project.my_dataset.my_table "
+          ... "(island STRING, population INT64)")
+          {
+            "status": "SUCCESS",
+            "rows": []
+          }
+
+      Insert data into an existing table:
+
+          >>> execute_sql("my_project",
+          ... "INSERT INTO my_project.my_dataset.my_table (island, population) "
+          ... "VALUES ('Dream', 124), ('Biscoe', 168)")
+          {
+            "status": "SUCCESS",
+            "rows": []
+          }
+
       Create a table from the result of a query:
 
-          >>> execute_sql("bigframes-dev",
+          >>> execute_sql("my_project",
           ... "CREATE TABLE my_project.my_dataset.my_table AS "
           ... "SELECT island, COUNT(*) AS population "
           ... "FROM bigquery-public-data.ml_datasets.penguins GROUP BY island")
@@ -119,7 +208,7 @@ _execute_sql_write_examples = """
 
       Delete a table:
 
-          >>> execute_sql("bigframes-dev",
+          >>> execute_sql("my_project",
           ... "DROP TABLE my_project.my_dataset.my_table")
           {
             "status": "SUCCESS",
@@ -128,7 +217,7 @@ _execute_sql_write_examples = """
 
       Copy a table to another table:
 
-          >>> execute_sql("bigframes-dev",
+          >>> execute_sql("my_project",
           ... "CREATE TABLE my_project.my_dataset.my_table_clone "
           ... "CLONE my_project.my_dataset.my_table")
           {
@@ -139,7 +228,7 @@ _execute_sql_write_examples = """
       Create a snapshot (a lightweight, read-optimized copy) of en existing
       table:
 
-          >>> execute_sql("bigframes-dev",
+          >>> execute_sql("my_project",
           ... "CREATE SNAPSHOT TABLE my_project.my_dataset.my_table_snapshot "
           ... "CLONE my_project.my_dataset.my_table")
           {
@@ -152,7 +241,64 @@ _execute_sql_write_examples = """
       it:
           - Use "CREATE OR REPLACE TABLE" instead of "CREATE TABLE".
           - First run "DROP TABLE", followed by "CREATE TABLE".
-      - To insert data into a table, use "INSERT INTO" statement.
+  """
+
+
+_execute_sql_protecetd_write_examples = """
+      Create a temporary table with schema prescribed:
+
+          >>> execute_sql("my_project",
+          ... "CREATE TEMP TABLE my_table (island STRING, population INT64)")
+          {
+            "status": "SUCCESS",
+            "rows": []
+          }
+
+      Insert data into an existing temporary table:
+
+          >>> execute_sql("my_project",
+          ... "INSERT INTO my_table (island, population) "
+          ... "VALUES ('Dream', 124), ('Biscoe', 168)")
+          {
+            "status": "SUCCESS",
+            "rows": []
+          }
+
+      Create a temporary table from the result of a query:
+
+          >>> execute_sql("my_project",
+          ... "CREATE TEMP TABLE my_table AS "
+          ... "SELECT island, COUNT(*) AS population "
+          ... "FROM bigquery-public-data.ml_datasets.penguins GROUP BY island")
+          {
+            "status": "SUCCESS",
+            "rows": []
+          }
+
+      Delete a table:
+
+          >>> execute_sql("my_project", "DROP TABLE my_table")
+          {
+            "status": "SUCCESS",
+            "rows": []
+          }
+
+      Copy a temporary table to another temporary table:
+
+          >>> execute_sql("my_project",
+          ... "CREATE TEMP TABLE my_table_clone CLONE my_table")
+          {
+            "status": "SUCCESS",
+            "rows": []
+          }
+
+  Notes:
+      - If a destination table already exists, there are a few ways to overwrite
+      it:
+          - Use "CREATE OR REPLACE TEMP TABLE" instead of "CREATE TEMP TABLE".
+          - First run "DROP TABLE", followed by "CREATE TEMP TABLE".
+      - Only temporary tables can be created and inserted into. Please do not
+      try creating a permanent table (non-TEMP table) or deleting one.
   """
 
 
@@ -189,6 +335,9 @@ def get_execute_sql(config: BigQueryToolConfig) -> Callable[..., dict]:
   functools.update_wrapper(execute_sql_wrapper, execute_sql)
 
   # Now, set the new docstring
-  execute_sql_wrapper.__doc__ += _execute_sql_write_examples
+  if config.write_mode == WriteMode.PROTECTED:
+    execute_sql_wrapper.__doc__ += _execute_sql_protecetd_write_examples
+  else:
+    execute_sql_wrapper.__doc__ += _execute_sql_write_examples
 
   return execute_sql_wrapper

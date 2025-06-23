@@ -23,11 +23,11 @@ from google.adk.tools.bigquery.config import WriteMode
 import google.auth
 
 # Define an appropriate credential type
-CREDENTIALS_TYPE = AuthCredentialTypes.OAUTH2
+CREDENTIALS_TYPE = None  # AuthCredentialTypes.OAUTH2
 
 
 # Define BigQuery tool config
-tool_config = BigQueryToolConfig(write_mode=WriteMode.ALLOWED)
+tool_config = BigQueryToolConfig(write_mode=WriteMode.PROTECTED)
 
 if CREDENTIALS_TYPE == AuthCredentialTypes.OAUTH2:
   # Initiaze the tools to do interactive OAuth

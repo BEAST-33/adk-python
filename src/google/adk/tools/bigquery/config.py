@@ -26,8 +26,16 @@ class WriteMode(Enum):
 
   BLOCKED = 'blocked'
   """No write operations are allowed.
-  
+
   This mode implies that only read (i.e. SELECT query) operations are allowed.
+  """
+
+  PROTECTED = 'protected'
+  """Only protected write operations are allowed in a BigQuery session.
+
+  In this mode write operations in a session are BigQuery session are allowed.
+  To learn more about BigQuery sessions, see
+  https://cloud.google.com/bigquery/docs/sessions-intro.
   """
 
   ALLOWED = 'allowed'
