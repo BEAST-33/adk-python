@@ -336,12 +336,12 @@ async def test_run_async_with_tool_context_and_unexpected_argument():
 
   result = await tool.run_async(
       args={
-          'expected_arg': 'world',
-          'parameters': 'should_also_be_filtered',
+          "expected_arg": "world",
+          "parameters": "should_also_be_filtered",
       },
       tool_context=mock_tool_context,
   )
   assert result == {
-      'received_arg': 'world',
-      'context_present': True,
+      "received_arg": "world",
+      "context_present": True,
   }
