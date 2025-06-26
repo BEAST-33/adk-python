@@ -14,10 +14,10 @@
 
 from unittest.mock import MagicMock
 
-from google.adk.tools.function_tool import FunctionTool
-from google.adk.tools.tool_context import ToolContext
 from google.adk.agents.invocation_context import InvocationContext
 from google.adk.sessions.session import Session
+from google.adk.tools.function_tool import FunctionTool
+from google.adk.tools.tool_context import ToolContext
 import pytest
 
 
@@ -304,7 +304,7 @@ async def test_run_async_with_unexpected_argument():
   """Test that run_async filters out unexpected arguments."""
 
   def sample_func(expected_arg: str):
-    return {'received_arg': expected_arg}
+    return {"received_arg": expected_arg}
 
   tool = FunctionTool(sample_func)
   mock_invocation_context = MagicMock(spec=InvocationContext)
@@ -314,10 +314,10 @@ async def test_run_async_with_unexpected_argument():
   tool_context_mock = ToolContext(invocation_context=mock_invocation_context)
 
   result = await tool.run_async(
-      args={'expected_arg': 'hello', 'parameters': 'should_be_filtered'},
+      args={"expected_arg": "hello", "parameters": "should_be_filtered"},
       tool_context=tool_context_mock,
   )
-  assert result == {'received_arg': 'hello'}
+  assert result == {"received_arg": "hello"}
 
 
 @pytest.mark.asyncio
@@ -325,7 +325,7 @@ async def test_run_async_with_tool_context_and_unexpected_argument():
   """Test that run_async handles tool_context and filters out unexpected arguments."""
 
   def sample_func_with_context(expected_arg: str, tool_context: ToolContext):
-    return {'received_arg': expected_arg, 'context_present': bool(tool_context)}
+    return {"received_arg": expected_arg, "context_present": bool(tool_context)}
 
   tool = FunctionTool(sample_func_with_context)
   mock_invocation_context = MagicMock(spec=InvocationContext)
