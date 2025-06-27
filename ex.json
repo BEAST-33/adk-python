@@ -1,0 +1,319 @@
+Query response: [('yes',), ('....',), ('Very new bus. Neat and clean. best service. Keep it up.pick and drop facility in prime area like perundurai,Mettukadai,Thindal,palaya palayam,G.H, Bus stant,chittode,Bhavani etc in  erode is good.',), ('none',), ('Rest stop was delayed',), ('it was good',), ('Good',), ('Becoming a fan of this bus',), ('It was a very comfortable and excellent travel experience',), ('good 😊',), ('very much comfortable',), ('best bus ever',), ('Much much better than other bus. Good 👍',), ('good',), ('ok',), ('Had a safe and comfort travel',), ('good',), ('All',), ('good',), ('good travel',), ('Everything about the bus travel experience exceeds expectations.right choice to travel.',), ('good',), ("Didn't receive water bottle and snacks.. and it would be much better if they inform the stopping prior in five mins",), ('Staff behaviour was soo good. Loved it.',), ('Good',), ('Seat comfort not much good',), ('Nice trip',), ('Amazing experience & Friendly staff behaviour. Keep doing it.',), ('super journey 💞',), ('Keep it up for all',), ('Awesome Nice',), ('good. service',), ('Driver is good',), ('Good timing ,clean and comfortable',), ('Timely pick up and drop good service',), ('nice and safe journey',), ('Good travel expect the breakdown issues',), ('ac',), ('Good',), ('nice',), ('good',), ('one of the best travel in sleeper really good experience and awesome 💯💯',), ('Excellent. Becoming a fan of this bus.',), ('Excellent',), ('Drivers are So professional and polite\nmore than 5 star for them\n\nDefinitely will prefer next time',), ('Good',), ('good',), ("The journey was good. Good staff. The pillow could have been better because it wasn't comfortable for sleeping.",), ('Superb',), ('Excellent travel in all aspects in your bus. Best wishes to you and your team. Keep it up.',), ('Good and comfortable',), ('Staff behaviour was good.',), ('Very nice to travel',), ('During sharp turns, it was difficult to sleep comfortably due to fear of falling off due to small gaurd on the side. Perhaps I was not used to it. Everything else was great overall',), ('All super',), ('The leather seat was dusty . Can improve on that.otherwise it was a really good experience',), ('good',), ('Bus was a late by almost an hour, but I can understand Chennai traffic',), ('*',), ('Keep it up.',), ('All good',), ('Very good experience.',), ('I enjoyed my trip.bus facility was very good.i appreciate the driver for in time pickup and drop.bus staff was checking the passenger after the tea and washroom break.this duty sense is very nice.i also appreciate the Bus Association chairman and office bears for very good and hygiene washroom facility.\nOverall very good travel in " DHEERAN"',), ('Nice bus',), ('good',), ('Neat',), ('All good',), ('good',), ('Stuck with a minor accident with car delayed by an more than 1.30 hours',), ('Nice travel',), ('Good',), ('very nice',), ('good',), ('Clean',), ('All good',), ("very good service provided by dheeran transport, safe ride with punctuality, even we ask to stop for rest stop 2-3times they'll stopped.. thanks for the service",), ('gud',), ('comfortable and i prepare for the next  travel 🧳.',), ('Good',), ('Excellent',), ('Neat and clean bus',), ('on time travel',), ('They are not considering if we ask for washroom stop. Where I started at 9.30pm and my journey ended at 7.30 am. Inbetween they have planned only one restroom stop and even if we asked them they are not considering to stop for an emergency.',), ('Neat & clean bus. Timely',), ('nice',), ('all good',), ('Good',), ('classic \nwell maintained',), ('comfort was good',), ('all good',), ('Time to long',), ('Nice',), ('.',), ('Very good service',), ('good',), ('Good',), ('Arrived an hour late ,',), ('make sure to add early morning rest stop..',), ('Good and comfortable journey',), ('Deeran transport services excellent 👌 👏 👍',), ('Everything is good near and clean bus on time arrival and dispatch',), ('Kindly update your live tracking',)
+]
+Output ==>  {'jsonrpc': '2.0', 'id': 'test-req-1', 'result': {'id': 'test-task-1', 'status': {'state': 'completed', 'timestamp': '2025-06-25T08: 51: 47.459141'
+        }, 'history': [], 'artifacts': [
+            {'parts': [
+                    {'type': 'text', 'text': '{
+                            "review": [
+                                [
+                                    "yes"
+                                ],
+                                [
+                                    "...."
+                                ],
+                                [
+                                    "Very new bus. Neat and clean. best service. Keep it up.pick and drop facility in prime area like perundurai,Mettukadai,Thindal,palaya palayam,G.H, Bus stant,chittode,Bhavani etc in  erode is good."
+                                ],
+                                [
+                                    "none"
+                                ],
+                                [
+                                    "Rest stop was delayed"
+                                ],
+                                [
+                                    "it was good"
+                                ],
+                                [
+                                    "Good"
+                                ],
+                                [
+                                    "Becoming a fan of this bus"
+                                ],
+                                [
+                                    "It was a very comfortable and excellent travel experience"
+                                ],
+                                [
+                                    "good \\ud83d\\ude0a"
+                                ],
+                                [
+                                    "very much comfortable"
+                                ],
+                                [
+                                    "best bus ever"
+                                ],
+                                [
+                                    "Much much better than other bus. Good \\ud83d\\udc4d"
+                                ],
+                                [
+                                    "good"
+                                ],
+                                [
+                                    "ok"
+                                ],
+                                [
+                                    "Had a safe and comfort travel"
+                                ],
+                                [
+                                    "good"
+                                ],
+                                [
+                                    "All"
+                                ],
+                                [
+                                    "good"
+                                ],
+                                [
+                                    "good travel"
+                                ],
+                                [
+                                    "Everything about the bus travel experience exceeds expectations.right choice to travel."
+                                ],
+                                [
+                                    "good"
+                                ],
+                                ["Didn\'t receive water bottle and snacks.. and it would be much better if they inform the stopping prior in five mins"
+                                ],
+                                [
+                                    "Staff behaviour was soo good. Loved it."
+                                ],
+                                [
+                                    "Good"
+                                ],
+                                [
+                                    "Seat comfort not much good"
+                                ],
+                                [
+                                    "Nice trip"
+                                ],
+                                [
+                                    "Amazing experience & Friendly staff behaviour. Keep doing it."
+                                ],
+                                [
+                                    "super journey \\ud83d\\udc9e"
+                                ],
+                                [
+                                    "Keep it up for all"
+                                ],
+                                [
+                                    "Awesome Nice"
+                                ],
+                                [
+                                    "good. service"
+                                ],
+                                [
+                                    "Driver is good"
+                                ],
+                                [
+                                    "Good timing ,clean and comfortable"
+                                ],
+                                [
+                                    "Timely pick up and drop good service"
+                                ],
+                                [
+                                    "nice and safe journey"
+                                ],
+                                [
+                                    "Good travel expect the breakdown issues"
+                                ],
+                                [
+                                    "ac"
+                                ],
+                                [
+                                    "Good"
+                                ],
+                                [
+                                    "nice"
+                                ],
+                                [
+                                    "good"
+                                ],
+                                [
+                                    "one of the best travel in sleeper really good experience and awesome \\ud83d\\udcaf\\ud83d\\udcaf"
+                                ],
+                                [
+                                    "Excellent. Becoming a fan of this bus."
+                                ],
+                                [
+                                    "Excellent"
+                                ],
+                                [
+                                    "Drivers are So professional and polite\\nmore than 5 star for them\\n\\nDefinitely will prefer next time"
+                                ],
+                                [
+                                    "Good"
+                                ],
+                                [
+                                    "good"
+                                ],
+                                ["The journey was good. Good staff. The pillow could have been better because it wasn\'t comfortable for sleeping."
+                                ],
+                                [
+                                    "Superb"
+                                ],
+                                [
+                                    "Excellent travel in all aspects in your bus. Best wishes to you and your team. Keep it up."
+                                ],
+                                [
+                                    "Good and comfortable"
+                                ],
+                                [
+                                    "Staff behaviour was good."
+                                ],
+                                [
+                                    "Very nice to travel"
+                                ],
+                                [
+                                    "During sharp turns, it was difficult to sleep comfortably due to fear of falling off due to small gaurd on the side. Perhaps I was not used to it. Everything else was great overall"
+                                ],
+                                [
+                                    "All super"
+                                ],
+                                [
+                                    "The leather seat was dusty . Can improve on that.otherwise it was a really good experience"
+                                ],
+                                [
+                                    "good"
+                                ],
+                                [
+                                    "Bus was a late by almost an hour, but I can understand Chennai traffic"
+                                ],
+                                [
+                                    "*"
+                                ],
+                                [
+                                    "Keep it up."
+                                ],
+                                [
+                                    "All good"
+                                ],
+                                [
+                                    "Very good experience."
+                                ],
+                                [
+                                    "I enjoyed my trip.bus facility was very good.i appreciate the driver for in time pickup and drop.bus staff was checking the passenger after the tea and washroom break.this duty sense is very nice.i also appreciate the Bus Association chairman and office bears for very good and hygiene washroom facility.\\nOverall very good travel in \\" DHEERAN\\""
+                                ],
+                                [
+                                    "Nice bus"
+                                ],
+                                [
+                                    "good"
+                                ],
+                                [
+                                    "Neat"
+                                ],
+                                [
+                                    "All good"
+                                ],
+                                [
+                                    "good"
+                                ],
+                                [
+                                    "Stuck with a minor accident with car delayed by an more than 1.30 hours"
+                                ],
+                                [
+                                    "Nice travel"
+                                ],
+                                [
+                                    "Good"
+                                ],
+                                [
+                                    "very nice"
+                                ],
+                                [
+                                    "good"
+                                ],
+                                [
+                                    "Clean"
+                                ],
+                                [
+                                    "All good"
+                                ],
+                                ["very good service provided by dheeran transport, safe ride with punctuality, even we ask to stop for rest stop 2-3times they\'ll stopped.. thanks for the service"
+                                ],
+                                [
+                                    "gud"
+                                ],
+                                [
+                                    "comfortable and i prepare for the next  travel \\ud83e\\uddf3."
+                                ],
+                                [
+                                    "Good"
+                                ],
+                                [
+                                    "Excellent"
+                                ],
+                                [
+                                    "Neat and clean bus"
+                                ],
+                                [
+                                    "on time travel"
+                                ],
+                                [
+                                    "They are not considering if we ask for washroom stop. Where I started at 9.30pm and my journey ended at 7.30 am. Inbetween they have planned only one restroom stop and even if we asked them they are not considering to stop for an emergency."
+                                ],
+                                [
+                                    "Neat & clean bus. Timely"
+                                ],
+                                [
+                                    "nice"
+                                ],
+                                [
+                                    "all good"
+                                ],
+                                [
+                                    "Good"
+                                ],
+                                [
+                                    "classic \\nwell maintained"
+                                ],
+                                [
+                                    "comfort was good"
+                                ],
+                                [
+                                    "all good"
+                                ],
+                                [
+                                    "Time to long"
+                                ],
+                                [
+                                    "Nice"
+                                ],
+                                [
+                                    "."
+                                ],
+                                [
+                                    "Very good service"
+                                ],
+                                [
+                                    "good"
+                                ],
+                                [
+                                    "Good"
+                                ],
+                                [
+                                    "Arrived an hour late ,"
+                                ],
+                                [
+                                    "make sure to add early morning rest stop.."
+                                ],
+                                [
+                                    "Good and comfortable journey"
+                                ],
+                                [
+                                    "Deeran transport services excellent \\ud83d\\udc4c \\ud83d\\udc4f \\ud83d\\udc4d"
+                                ],
+                                [
+                                    "Everything is good near and clean bus on time arrival and dispatch"
+                                ],
+                                [
+                                    "Kindly update your live tracking"
+                                ]
+                            ],
+                            "route_id": "37675366"
+                        }'
+                    }
+                ], 'index': 0
+            }
+        ]
+    }
+}

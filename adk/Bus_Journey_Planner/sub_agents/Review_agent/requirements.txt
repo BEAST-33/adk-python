@@ -1,0 +1,4 @@
+google-adk
+clickhouse_connect
+pydantic
+

@@ -1,0 +1,1 @@
+export OLLAMA_API_BASE=http://10.120.17.147:11434
