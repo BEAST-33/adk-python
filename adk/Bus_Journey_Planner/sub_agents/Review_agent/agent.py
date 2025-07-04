@@ -90,7 +90,7 @@ def Bus_review_tool(route_id: str) -> ReviewSearchResponse:
 # Create the LLM agent
 Review_agent = LlmAgent(
     name="Review_Agent",
-    model=LiteLlm(model="ollama_chat/llama3.2:latest"), # Ensure this model is accessible and configured correctly
+    model="gemini-2.0-flash", # Ensure this model is accessible and configured correctly
     tools=[Bus_review_tool], # Register the tool with the agent
     instruction="""
     You are a helpful bus review assistant. Your primary goal is to fetch and present a bus review for a given route ID, and then conclude your response for the current turn.

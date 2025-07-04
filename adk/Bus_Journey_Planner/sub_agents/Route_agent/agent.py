@@ -87,7 +87,7 @@ def generate_nomic_embeddings(text):
         logger.warning(f"Error in Nomic embedding generation: {e}")
         return None
 
-def perform_ann_query(session_param, table_name, query_embedding, limit=5):
+def perform_ann_query(session_param, table_name, query_embedding, limit=50):
     """Performs an Approximate Nearest Neighbors (ANN) query on the specified Cassandra table."""
     if not session_param:
         logger.error("No valid Cassandra session provided to perform_ann_query.")
@@ -169,7 +169,7 @@ def Route_search_tool(user_query: str) -> RouteSearchResponse:
 # Create the LLM agent
 Route_agent = LlmAgent(
     name="Route_Agent",
-    model=LiteLlm(model="ollama_chat/llama3.2:latest"),
+    model="gemini-2.0-flash",
     tools=[Route_search_tool],
     instruction="""
     You are a specialized bus route assistant. Your primary function is to help users find bus routes by using the tools available to you.

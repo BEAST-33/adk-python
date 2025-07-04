@@ -160,7 +160,9 @@ def Route_search_tool(user_query: str) -> RouteSearchResponse:
             context_info += "\n"
         
         logger.info(f"Successfully found and formatted {len(ann_results)} routes.")
+        logger.info(f"All the information returned .",context_info)
         return RouteSearchResponse(status="success", message=context_info)
+
 
     except Exception as e:
         logger.error(f"An unexpected error occurred in Route_search_tool: {e}", exc_info=True)

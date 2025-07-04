@@ -176,7 +176,7 @@ def get_seat_availability(route_id: str, journey_date: Optional[str] = None) -> 
 # Create the LLM agent
 Seating_agent = LlmAgent(
     name="Seating_Agent",
-    model=LiteLlm(model="ollama_chat/llama3.2:latest"),
+    model="gemini-2.0-flash",
     description=("An agent to check bus seat availability for specific routes using RouteID."),
     instruction="""
 You are a helpful bus seat availability assistant. You help users check seat availability by:
@@ -202,7 +202,7 @@ For date-specific queries:
     """,
     tools=[get_seat_availability],
 )
-
+root_agent= Seating_agent
 
 
 
